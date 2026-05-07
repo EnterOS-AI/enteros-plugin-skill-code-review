@@ -58,7 +58,7 @@ The skill evaluates PRs across these dimensions:
 ### Setup
 
 ```bash
-git clone https://github.com/Molecule-AI/molecule-ai-plugin-molecule-skill-code-review.git
+git clone https://git.moleculesai.app/molecule-ai/molecule-ai-plugin-molecule-skill-code-review.git
 cd molecule-ai-plugin-molecule-skill-code-review
 python3 -c "import yaml; yaml.safe_load(open('plugin.yaml'))"
 ```
