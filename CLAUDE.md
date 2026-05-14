@@ -1,7 +1,7 @@
 # molecule-skill-code-review — Multi-Criteria Code Review Skill
 
 `molecule-skill-code-review` provides a multi-criteria code review skill
-that checks PRs against best practices, modularity, scalability, abstraction,
+that checks PRs against best practices, modularity, scalability, appropriate abstraction,
 test coverage, redundancy, hardcoded values, type safety, performance, naming,
 API design, async patterns, config/env sync, template consistency, and
 documentation alignment.
@@ -33,7 +33,7 @@ The skill evaluates PRs across these dimensions:
 | Best practices | Language idioms, error handling, resource cleanup |
 | Modularity | Single responsibility, low coupling |
 | Scalability | Algorithm complexity, pagination, streaming |
-| Abstraction | Correct use of interfaces/types |
+| Abstraction | Justified by actual usage, not speculative future-proofing |
 | Test coverage | Tests for new logic, edge cases |
 | Redundancy | DRY violations, copy-paste |
 | Hardcoded values | Secrets, URLs, magic numbers |
