@@ -1,6 +1,6 @@
 ---
 name: code-review
-description: "Review code for best practices, modularity, scalability, abstraction, test coverage, redundancy, hardcoded values, type safety, performance, naming, API design, async patterns, config/env sync, template consistency, and documentation alignment. Generates detailed report with issues and recommendations."
+description: "Review code for best practices, modularity, scalability, appropriate abstraction, test coverage, redundancy, hardcoded values, type safety, performance, naming, API design, async patterns, config/env sync, template consistency, and documentation alignment. Generates detailed report with issues and recommendations."
 origin: molecule-skill-code-review
 ---
 
@@ -21,8 +21,9 @@ Perform a comprehensive code review of recent changes or specified files to ensu
 ### 2. Modularity
 - Single responsibility principle (each function/class does one thing)
 - Functions are small and focused (< 50 lines ideally)
-- No code duplication (DRY principle)
+- No code duplication (DRY principle) — but don't extract shared helpers until the pattern repeats at least twice
 - Clear separation of concerns (routes, services, utilities)
+- No speculative generalization — don't introduce interfaces or base classes for a single implementation
 
 ### 3. Scalability
 - Efficient database queries (proper indexing, no N+1 queries)
@@ -31,10 +32,12 @@ Perform a comprehensive code review of recent changes or specified files to ensu
 - No blocking operations in hot paths
 
 ### 4. Abstraction
-- Interfaces/types defined for all public APIs
-- Implementation details hidden behind abstractions
-- Adapter pattern used for external services (LLM, database)
+- Abstraction is justified by actual usage, not speculative future-proofing
+- Interfaces/types used where they solve a real problem (multiple implementations, test mocking, API contracts)
+- Avoid abstraction for a single call site — inline until duplication emerges
+- Adapter pattern used for external services (LLM, database) where swapability is a real requirement
 - Configuration externalized (not hardcoded)
+- Prefer concrete types over generic abstractions when the scope is small
 
 ### 5. Test Coverage
 - Unit tests exist for all utility functions and service functions
@@ -44,13 +47,13 @@ Perform a comprehensive code review of recent changes or specified files to ensu
 - All exported functions have at least one test
 
 ### 6. No Redundancy
-- No duplicate code blocks (extract to shared functions/utilities)
-- No repeated logic across files (consolidate into services)
+- No duplicate code blocks (extract to shared functions/utilities only after the pattern appears twice)
+- No repeated logic across files (consolidate into services only when the duplication is real, not coincidentally similar)
 - No redundant imports or unused variables
-- No copy-pasted code with minor variations (use parameters/generics)
+- No copy-pasted code with minor variations (use parameters/generics when the duplication is structural, not accidental)
 - No redundant API calls (cache or batch where appropriate)
-- No repeated validation logic (create reusable validators)
-- No duplicate helper logic in test files (extract shared test utilities)
+- No repeated validation logic (create reusable validators when the same rule is enforced in 3+ places)
+- No duplicate helper logic in test files (extract shared test utilities when the same setup repeats across multiple test suites)
 
 ### 7. No Hardcoded Values
 - No hardcoded URLs, API endpoints, or hostnames (use env vars)

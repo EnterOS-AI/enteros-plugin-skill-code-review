@@ -1,6 +1,6 @@
 name: molecule-skill-code-review
 version: 1.0.0
-description: Multi-criteria code review skill — best practices, modularity, scalability, abstraction, test coverage, redundancy, hardcoded values, type safety, performance, naming, API design, async patterns, config/env sync, template consistency, documentation alignment.
+description: Multi-criteria code review skill — best practices, modularity, scalability, appropriate abstraction, test coverage, redundancy, hardcoded values, type safety, performance, naming, API design, async patterns, config/env sync, template consistency, documentation alignment.
 author: Molecule AI
 tags: [molecule, guardrails, code-review]
 
