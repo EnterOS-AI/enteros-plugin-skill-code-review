@@ -66,3 +66,14 @@ jobs:
           else:
               print("::notice::No secrets detected")
           PYEOF
+
+      - name: Run smoke tests
+        # Run the repo's unittest-based smoke suite (tests/test_*.py).
+        # Additive: existing validate + secret-check steps are unchanged.
+        # Uses stdlib unittest only (pyyaml is already installed above).
+        # pytest is invoked for nicer test discovery + summary output; the
+        # tests themselves are pure unittest, so this works without adding
+        # any new runtime dependency.
+        run: |
+          pip install pytest -q
+          python -m pytest tests/ -v
