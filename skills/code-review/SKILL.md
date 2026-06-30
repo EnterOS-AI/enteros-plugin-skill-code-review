@@ -8,6 +8,55 @@ origin: molecule-skill-code-review
 
 Perform a comprehensive code review of recent changes or specified files to ensure quality standards.
 
+## Acquiring the diff (Gitea) — do this FIRST
+
+Before scoring any criterion you MUST have the **full unified diff** in hand.
+Most false `REQUEST_CHANGES` verdicts ("the patch body is absent" / "I can't see
+the diff" / files listed as `(no patch)`) come from reading the per-file `patch`
+field of the PR *files* endpoint, which Gitea **omits** for large, binary, or
+many-file PRs — the field is simply not present, so the review sees `(no patch)`
+for every file. **Never conclude "I can't see the diff" from an empty `patch`
+field.** Fetch the unified diff instead.
+
+### Correct: the `/api/v1` PR diff endpoint
+
+```bash
+# OWNER/REPO/N come from the PR. GITEA_API_URL ends in /api/v1 — e.g.
+#   internal: http://localhost:3200/api/v1   (preferred; skips the CF edge)
+#   public:   https://git.moleculesai.app/api/v1
+curl -fsS \
+  -H "Authorization: token $GITEA_TOKEN" \
+  -H "User-Agent: Mozilla/5.0" \
+  "$GITEA_API_URL/repos/$OWNER/$REPO/pulls/$N.diff"
+```
+
+This returns the real unified diff (`diff --git …`, HTTP 200, non-empty). The
+`.patch` variant (`…/pulls/$N.patch`) returns the same hunks in git-mailbox
+format when you also need commit metadata.
+
+### Wrong paths — these ARE the bug, do NOT use
+
+- **The non-`/api/v1` web route** `…/$OWNER/$REPO/pulls/$N.diff` (missing the
+  `/api/v1/repos/` prefix) returns **HTTP 404**, and behind Cloudflare on the
+  public host it returns a CF-1010 challenge page. This is the single most common
+  cause of the false "patch body absent" verdict.
+- **`gh pr diff`** targets github.com and cannot read this Gitea instance.
+- **Relying solely on `…/pulls/$N/files`** — use it only for per-file metadata
+  (status, +/- counts, filenames). Its `patch` field is optional; when it is
+  missing, read the hunks from the `.diff` above, not from `files`.
+
+### Auth / host notes
+
+- Always send **both** the `Authorization: token $GITEA_TOKEN` header **and** a
+  browser `User-Agent` (e.g. `Mozilla/5.0`); the public host's WAF blocks default
+  agents (CF-1010).
+- Prefer the internal host (`http://localhost:3200/api/v1`) when reachable; fall
+  back to the public `https://git.moleculesai.app/api/v1` with the same headers.
+
+Only after the `.diff` fetch returns non-empty should you begin scoring the
+criteria below. A genuinely empty diff (0 bytes, HTTP 200) means the PR has no
+changes — only then is "no diff" accurate.
+
 ## Review Criteria
 
 ### 1. Best Practices
