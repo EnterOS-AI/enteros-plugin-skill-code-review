@@ -17,7 +17,12 @@ jobs:
           python-version: "3.11"
           cache: "pip"
           cache-dependency-path: .molecule-ci-canonical/.molecule-ci/scripts/requirements.txt
-      - run: pip install pyyaml -q
+      # Install the canonical validator deps (pyyaml + jsonschema). The
+      # validator now validates plugin.yaml against the vendored
+      # molecule-contracts schema and imports jsonschema; installing from the
+      # canonical requirements.txt (already the pip cache key above) keeps this
+      # in lockstep with molecule-ci instead of hand-listing packages that drift.
+      - run: pip install -r .molecule-ci-canonical/.molecule-ci/scripts/requirements.txt -q
       - run: python3 .molecule-ci-canonical/.molecule-ci/scripts/validate-plugin.py
       - name: Check for secrets
         run: |
