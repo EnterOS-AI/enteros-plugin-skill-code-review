@@ -33,4 +33,7 @@ jobs:
           UPDATE_STYLE: merge
           REQUIRED_CONTEXTS: >-
             CI / validate (pull_request)
-        run: python3 .gitea/scripts/gitea-merge-queue.py
+        run: |
+          set -euo pipefail
+          python3 .gitea/scripts/tests/test_gitea_merge_queue_user_agent.py
+          python3 .gitea/scripts/gitea-merge-queue.py
