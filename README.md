@@ -1,6 +1,6 @@
 # molecule-skill-code-review — Multi-Axis Code Review
 
-Plugin for Claude Code. Invokes a 16-criteria code review across code quality
+Plugin for Claude Code. Invokes a 17-criteria code review across code quality
 dimensions: best practices, modularity, scalability, appropriate abstraction, test coverage,
 redundancy, hardcoded values, type safety, performance, naming, API design,
 async patterns, config/env sync, template consistency, and documentation alignment.
