@@ -1,15 +1,12 @@
 name: gitea-merge-queue
 on:
-  # `schedule:` removed — the operator conductor tick now runs this queue
-  # in-process every 5 min with THIS repo's env + script version preserved
-  # (operator-config#194; measurement on operator-config#157: the schedule
-  # burned 288 container jobs/day/repo, ~52k/week fleet-wide, ~99% no-ops).
-  # workflow_dispatch below remains the manual fallback vehicle.
-  # Conductor kill-switch (operator host):
-  #   touch /etc/molecule-bootstrap/molecule-ci-conductor-fleet.disabled
-  # Full rollback: restore
-  #   schedule:
-  #     - cron: "*/5 * * * *"
+  # `schedule:` was removed to avoid fleet-wide no-op runner jobs. Presence of
+  # this workflow is the opt-in marker consumed by the scoped conductor source
+  # in molecule-ai/operator-config (`bin/molecule-ci-fleet-queue.py`).
+  # `workflow_dispatch` remains the explicit manual fallback. A deployed
+  # conductor's fleet kill switch is
+  # `/var/lib/molecule/disabled/molecule-ci-conductor-fleet`; no operator host
+  # or `/etc/molecule-bootstrap` control path exists.
   workflow_dispatch:
 permissions:
   contents: read
@@ -36,4 +33,7 @@ jobs:
           UPDATE_STYLE: merge
           REQUIRED_CONTEXTS: >-
             CI / validate (pull_request)
-        run: python3 .gitea/scripts/gitea-merge-queue.py
+        run: |
+          set -euo pipefail
+          python3 .gitea/scripts/tests/test_gitea_merge_queue_user_agent.py
+          python3 .gitea/scripts/gitea-merge-queue.py
