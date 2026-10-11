@@ -190,6 +190,15 @@ changes — only then is "no diff" accurate.
 - Error boundaries to prevent full app crashes
 - Proper form validation with clear feedback
 
+### 17. Model-Fact Claims (live-source rule — applies to YOUR review verdict)
+- A finding that a model ID is "fabricated", "hallucinated", "unknown", "not a real model", or "invalid" — or any claim that a model ID *is* or *is not* valid — is INVALID unless you cite a live/authoritative source. Authoritative sources, in order of preference:
+  1. A passing `ci/serving-e2e` arm for that exact model (empirical proof — a real completion was served by the real upstream). Serving-e2e green ⇒ the model demonstrably exists and serves.
+  2. The live vendor catalog/docs (Anthropic: `GET https://api.anthropic.com/v1/models` or `https://docs.anthropic.com/.../models`; equivalent live endpoint for any other vendor).
+  3. The providers SSOT (`internal/providers/providers.yaml` + derived registry) together with the model-id catalog guard allowlist entry (`cmd/lint-model-id-catalog/anthropic_model_allowlist.txt`), which carries a dated live-source citation per entry.
+- Your training data has a cutoff. Any model GA'd AFTER that cutoff is absent from your priors and will LOOK fabricated even when it is real. "I don't recognize this model" is a statement about your training date, NOT evidence of fabrication. The in-weights training catalog is NOT authoritative for any model GA'd after your cutoff.
+- If you cannot cite a live check, DEFER — do not block. Raise it as a question ("confirm `<id>` against a live source — serving-e2e or the vendor catalog") and let an authoritative check resolve it. NEVER post a blocking "fabricated model" finding, and NEVER recommend reverting working, serving-e2e-green model support on the strength of an unrecognized name.
+- Precedent: `claude-fable-5` was GA 2026-06-09 and real (`ci/serving-e2e`-green, cp#688), yet reviewers repeatedly called it "fabricated" from their in-weights catalog — those calls were wrong. By 2026-06-12 Anthropic had deprecated it (upstream HTTP 404 "Claude Fable 5 is not available. Please use Opus 4.8."); it was removed from `providers.yaml` and its price row expired (controlplane ac60d920, migration 054), and it was the serving-e2e gate that caught it. Both facts came from live sources, not from priors and not from this file. Never treat a model ID named in this checklist as currently valid: check it live.
+
 ## Output Format
 
 ```markdown
