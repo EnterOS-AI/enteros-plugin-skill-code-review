@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """gitea-merge-queue — conservative serialized merge bot for Gitea.
 
-Gitea 1.22.6 has auto-merge (`pull_auto_merge`) but no GitHub-style merge
-queue. This script provides the missing serialized policy in user space:
+This deployment uses an explicit serialized, label-driven merge policy in
+user space:
 
 1. Pick the oldest open PR carrying QUEUE_LABEL.
 2. Refuse to act unless main is green.
@@ -88,6 +88,9 @@ def api(
     headers = {
         "Authorization": f"token {GITEA_TOKEN}",
         "Accept": "application/json",
+        # Cloudflare rejects Python-urllib's default signature before the
+        # request reaches Gitea.
+        "User-Agent": "curl/8.4.0",
     }
     if body is not None:
         data = json.dumps(body).encode("utf-8")
