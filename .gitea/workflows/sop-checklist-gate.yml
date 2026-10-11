@@ -17,16 +17,15 @@
 #         status itself is per-SHA so we re-post on the new head).
 #   - `issue_comment`: created, edited, deleted
 #       → fires on any new comment so /sop-ack / /sop-revoke take
-#         effect immediately (Gitea 1.22.6 doesn't refire on
-#         pull_request_review per feedback_pull_request_review_no_refire,
-#         so issue_comment is the canonical refire channel).
+#         effect immediately. This workflow does not subscribe to review
+#         events, so issue_comment is the canonical command channel.
 #
 # Trust boundary (mirrors RFC#324 §A4 + sop-tier-check security note):
 #   `pull_request_target` (not `pull_request`) — workflow def is loaded
 #   from BASE branch, so a PR cannot rewrite this workflow to exfiltrate
-#   the token. The `actions/checkout` step pins `ref: base.sha` so the
-#   script ALSO comes from BASE. PR-HEAD code is never executed in the
-#   runner.
+#   the token. The `actions/checkout` step explicitly pins the repository
+#   default branch, so the script also comes from a trusted branch.
+#   PR-HEAD code is never executed in the runner.
 #
 # Token scope:
 #   - read:repository, read:organization for PR + comments + team probes
@@ -76,10 +75,8 @@ on:
 permissions:
   contents: read
   pull-requests: read
-  # NOTE: `statuses: write` is the GitHub-Actions name for POST /statuses.
-  # Gitea 1.22.6 may not gate on this permission key (it just checks the
-  # token), but listing it explicitly documents intent for the next
-  # platform-version upgrade.
+  # `statuses: write` documents the POST /statuses mutation below. The
+  # selected Gitea token must also carry the repository write capability.
   statuses: write
 
 jobs:
@@ -95,7 +92,7 @@ jobs:
         contains(github.event.comment.body, '/sop-revoke')))
     runs-on: ubuntu-latest
     steps:
-      - name: Check out BASE ref (trust boundary — never PR-head)
+      - name: Check out trusted default branch (never PR-head)
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
         with:
           # For pull_request_target, the default branch is the trust
@@ -113,6 +110,7 @@ jobs:
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
           set -euo pipefail
+          python3 .gitea/scripts/tests/test_sop_checklist_gate_user_agent.py
           python3 .gitea/scripts/sop-checklist-gate.py \
             --owner "$OWNER" \
             --repo "$REPO_NAME" \
